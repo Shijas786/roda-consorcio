@@ -136,7 +136,8 @@ export function useHashRoute() {
   useEffect(() => {
     const on = () => {
       setHash(window.location.hash);
-      window.scrollTo(0, 0);
+      // Route changes start at the top; in-page anchors such as #circles keep the browser's scroll.
+      if (window.location.hash.startsWith("#/") || !window.location.hash) window.scrollTo(0, 0);
     };
     window.addEventListener("hashchange", on);
     return () => window.removeEventListener("hashchange", on);
