@@ -10,7 +10,16 @@ const notes: Record<Name, { f: number[]; step: number; len: number; type: Oscill
 
 const KEY = "roda.muted";
 let ctx: AudioContext | undefined;
-let muted = typeof localStorage !== "undefined" && localStorage.getItem(KEY) === "1";
+// Storage can be blocked by the browser; sound preferences are then kept for this visit only.
+const stored = (set?: string) => {
+  try {
+    if (set !== undefined) localStorage.setItem(KEY, set);
+    return localStorage.getItem(KEY);
+  } catch {
+    return null;
+  }
+};
+let muted = stored() === "1";
 const listeners = new Set<() => void>();
 
 export const isMuted = () => muted;
@@ -20,7 +29,7 @@ export const onMuteChange = (fn: () => void) => {
 };
 export function setMuted(value: boolean) {
   muted = value;
-  localStorage.setItem(KEY, value ? "1" : "0");
+  stored(value ? "1" : "0");
   listeners.forEach((fn) => fn());
 }
 
