@@ -1,6 +1,6 @@
 # Roda
 
-Rotating savings circles in USDG on Arbitrum.
+Rotating savings circles in USDG on Arbitrum. Live app: https://shijas786.github.io/roda-consorcio/
 
 A savings circle is the oldest group finance product there is: *consórcio* in Brazil, *chit fund* in India,
 *tanda* in Mexico, *susu* in West Africa. A group pays the same amount every round, and each round one member

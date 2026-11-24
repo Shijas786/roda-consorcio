@@ -53,8 +53,8 @@ cent and confirms in about a second.
 
 ## Links
 
-- Repository: TBD
-- Live app: TBD
+- Repository: https://github.com/Shijas786/roda-consorcio
+- Live app: https://shijas786.github.io/roda-consorcio/
 - Demo video: TBD
 - Factory: https://sepolia.arbiscan.io/address/0x4966dD6e5521BF9f04213B9C5C9A929c7D79EAfB
 

@@ -2,6 +2,7 @@ import { useReadContract, useReadContracts } from "wagmi";
 import { rodaCircleAbi, rodaFactoryAbi } from "./abi";
 import { addresses, tokenOf } from "./config";
 import { duration, fmt, type Address } from "./lib";
+import { Wheel, type Seat } from "./Wheel";
 
 export const statusLabel = ["Forming", "Active", "Completed", "Cancelled"] as const;
 
@@ -41,12 +42,21 @@ export function CircleList() {
             const t = tokenOf(token);
             return (
               <a className="card circle" key={address} href={`#/circle/${address}`}>
-                <div className="row between">
-                  <h3>{name}</h3>
-                  <span className={`pill s${status}`}>{statusLabel[status]}</span>
+                <div className="row between top">
+                  <div>
+                    <span className={`pill s${status}`}>{statusLabel[status]}</span>
+                    <h3>{name}</h3>
+                  </div>
+                  <Wheel
+                    size={84}
+                    progress={status === 2 ? 1 : Number(round) / Number(size)}
+                    seats={Array.from({ length: Number(size) }, (_, k): Seat => ({
+                      state: k >= Number(count) ? "open" : status === 2 || k < Number(round) ? "received" : "waiting",
+                    }))}
+                  />
                 </div>
                 <strong>
-                  {fmt(contribution * size, t.decimals)} {t.symbol} <small>pot</small>
+                  {fmt(contribution * size, t.decimals)} <small>{t.symbol} pot</small>
                 </strong>
                 <dl>
                   <dt>Each round</dt>

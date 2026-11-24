@@ -6,6 +6,7 @@ import { fmt, short, useHashRoute, useTx, type Address } from "./lib";
 import { CircleList } from "./CircleList";
 import { CirclePage } from "./CirclePage";
 import { CreateCircle } from "./CreateCircle";
+import { Wheel, type Seat } from "./Wheel";
 
 export function App() {
   const route = useHashRoute();
@@ -67,44 +68,69 @@ function Header() {
   );
 }
 
+const heroSeats: Seat[] = ["received", "received", "received", "paid", "paid", "due", "paid", "paid"].map((state, i) => ({
+  state: state as Seat["state"],
+  me: i === 3,
+}));
+
 function Home() {
   return (
     <>
       <section className="hero">
         <div>
-          <h1>Save together. Get the pot when you need it.</h1>
+          <span className="eyebrow">Consórcio · Chit fund · Tanda · Susu</span>
+          <h1>
+            Save together.
+            <br />
+            <em>Take the pot</em> when you need it.
+          </h1>
           <p>
-            Roda is the consórcio, chit fund and tanda rebuilt on Arbitrum. Every member pays the same amount each
-            round in USDG and one member takes the pot. Deposits are locked in the contract, missed payments are
-            covered automatically, and every finished circle builds a reputation you carry to the next one.
+            The world's oldest way to save, without the organizer who can run off with the money. Everyone pays in
+            USDG each round, one member takes the pot, and the contract enforces the rest.
           </p>
           <div className="row">
-            <a className="button primary" href="#/new">
+            <a className="button primary big" href="#/new">
               Start a circle
             </a>
-            <a className="button" href="#circles">
+            <a className="button big ghost" href="#circles">
               Browse circles
             </a>
           </div>
+          <div className="chips">
+            <span>Built on Arbitrum</span>
+            <span>Paid in USDG</span>
+            <span>No admin keys</span>
+          </div>
         </div>
-        <ol className="steps">
-          <li>
-            <b>Lock a deposit</b>
-            <span>Each seat posts a security deposit. The circle starts when the last seat fills.</span>
-          </li>
-          <li>
-            <b>Pay each round</b>
-            <span>Miss a payment and the contract takes it from your deposit, so the pot is still whole.</span>
-          </li>
-          <li>
-            <b>Bid for the pot</b>
-            <span>Need it early? Offer a discount. The discount is shared among the members who wait.</span>
-          </li>
-          <li>
-            <b>Build reputation</b>
-            <span>Clean circles raise your score and unlock circles with a minimum score.</span>
-          </li>
-        </ol>
+        <div className="hero-art">
+          <Wheel seats={heroSeats} progress={0.62} size={380}>
+            <label>This round's pot</label>
+            <strong>2,000</strong>
+            <span>USDG to seat 4</span>
+          </Wheel>
+        </div>
+      </section>
+      <section className="steps">
+        <div>
+          <i>1</i>
+          <b>Lock a deposit</b>
+          <span>Every seat posts a security deposit. The circle starts when the last seat fills.</span>
+        </div>
+        <div>
+          <i>2</i>
+          <b>Pay each round</b>
+          <span>Miss one and the contract pays it from your deposit, so the pot is always whole.</span>
+        </div>
+        <div>
+          <i>3</i>
+          <b>Bid for the pot</b>
+          <span>Need it early? Offer a discount. It goes to the members who wait.</span>
+        </div>
+        <div>
+          <i>4</i>
+          <b>Build reputation</b>
+          <span>Clean circles raise your score and unlock bigger circles.</span>
+        </div>
       </section>
       <Wallet />
       <CircleList />

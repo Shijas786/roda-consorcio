@@ -5,6 +5,7 @@ import { rodaCircleAbi, rodaReputationAbi } from "./abi";
 import { addresses, explorer, tokenOf } from "./config";
 import { statusLabel } from "./CircleList";
 import { duration, fmt, short, useNow, useTx, type Address, type Call } from "./lib";
+import { Wheel, type Seat } from "./Wheel";
 
 type Member = {
   joined: boolean;
@@ -73,27 +74,63 @@ export function CirclePage({ address }: { address: Address }) {
   const act = (label: string, fn: string, args?: readonly unknown[], spend?: bigint) =>
     tx.send(label, call(fn, args), spend ? { token, amount: spend } : undefined);
   const busy = !!tx.busy;
+  const seats: Seat[] = Array.from({ length: Number(size) }, (_, i) => {
+    const x = info(i);
+    const m = members[i];
+    if (!m) return { state: "open" };
+    const state: Seat["state"] = !x
+      ? "waiting"
+      : x.debt > 0n
+        ? "debt"
+        : x.received
+          ? "received"
+          : status !== 1
+            ? "waiting"
+            : BigInt(x.paidThrough) > round
+              ? "paid"
+              : "due";
+    return { state, label: short(m), me: m.toLowerCase() === me?.toLowerCase() };
+  });
+  const wheelProgress =
+    status === 1 ? Math.max(0, 1 - roundLeft / Number(period)) : status === 2 ? 1 : members.length / Number(size);
 
   return (
     <>
       <a className="back" href="#/">
         ← All circles
       </a>
-      <section className="row between wrap">
+      <section className="circle-head">
+        <Wheel size={300} progress={wheelProgress} seats={seats}>
+          <label>{status === 1 ? `Round ${round + 1n} of ${size}` : statusLabel[status]}</label>
+          <strong>{fmt(status === 1 ? roundCollected + carry : contribution * size, t.decimals)}</strong>
+          <span>
+            {status === 1
+              ? roundLeft > 0
+                ? `${t.symbol} in · ${duration(roundLeft)} left`
+                : `${t.symbol} in · round over`
+              : `${t.symbol} pot`}
+          </span>
+        </Wheel>
         <div>
-          <h1 className="title">
-            {name} <span className={`pill s${status}`}>{statusLabel[status]}</span>
-          </h1>
+          <span className={`pill s${status}`}>{statusLabel[status]}</span>
+          <h1 className="title">{name}</h1>
           <p className="muted">
             <a href={`${explorer}/address/${address}`} target="_blank" rel="noreferrer">
               {short(address)}
             </a>{" "}
             · started by {short(creator)} · {t.name}
           </p>
-        </div>
-        <div className="pot">
-          <label>Pot each round</label>
-          <strong>{amt(contribution * size)}</strong>
+          <div className="pot">
+            <label>Pot each round</label>
+            <strong>{amt(contribution * size)}</strong>
+          </div>
+          <ul className="legend">
+            <li className="paid">Paid</li>
+            <li className="due">Due</li>
+            <li className="received">Got the pot</li>
+            <li className="debt">In debt</li>
+            <li className="open">Open seat</li>
+          </ul>
         </div>
       </section>
 
