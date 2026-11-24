@@ -134,7 +134,7 @@ export function Activity({ circle }: { circle?: Address }) {
       <ol className="feed card">
         {!data && <li className="muted">Reading events from Arbitrum…</li>}
         {data && items.length === 0 && <li className="muted">Nothing yet.</li>}
-        {items.slice(0, SHOWN).map((i) => {
+        {(circle ? items : items.slice(0, SHOWN)).map((i) => {
           const [kind, line] = text(i);
           const t = data?.times.get(i.block);
           return (
@@ -145,7 +145,7 @@ export function Activity({ circle }: { circle?: Address }) {
                   {line}
                   {!circle && <em>{info(i.circle)?.name}</em>}
                 </span>
-                <time>{t ? ago(now - t) : ""}</time>
+                <time>{t ? ago(now - t) : `block ${i.block}`}</time>
                 <b>{i.tx.slice(0, 8)}… ↗</b>
               </a>
             </li>
