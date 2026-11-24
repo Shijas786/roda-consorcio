@@ -6,6 +6,7 @@ import { addresses, explorer, tokenOf } from "./config";
 import { statusLabel } from "./CircleList";
 import { duration, fmt, short, useNow, useTx, type Address, type Call } from "./lib";
 import { Wheel, type Seat } from "./Wheel";
+import { Activity } from "./Activity";
 
 type Member = {
   joined: boolean;
@@ -58,8 +59,9 @@ export function CirclePage({ address }: { address: Address }) {
     query: { enabled: members.length > 0, refetchInterval: 5000 },
   });
 
+  if (registered === false) return <p className="error">This address is not a Roda circle.</p>;
   if (isLoading || registered === undefined) return <p className="muted">Loading circle…</p>;
-  if (isError || !data || !registered) return <p className="error">This address is not a Roda circle.</p>;
+  if (isError || !data) return <p className="error">This address is not a Roda circle.</p>;
 
   const [
     name, token, contribution, size, period, deposit, minScore, joinDeadline, status, round, roundDeadline,
@@ -324,6 +326,7 @@ export function CirclePage({ address }: { address: Address }) {
           </table>
         </div>
       </section>
+      <Activity circle={address} />
     </>
   );
 }

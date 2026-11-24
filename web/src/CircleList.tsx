@@ -10,7 +10,12 @@ const PAGE = 100n;
 const fields = ["name", "token", "contribution", "size", "period", "depositRequired", "status", "round", "memberCount", "minScore"] as const;
 
 export function CircleList() {
-  const { data: total } = useReadContract({ address: addresses.factory, abi: rodaFactoryAbi, functionName: "circleCount" });
+  const { data: total } = useReadContract({
+    address: addresses.factory,
+    abi: rodaFactoryAbi,
+    functionName: "circleCount",
+    query: { refetchInterval: 8000 },
+  });
   // The registry lists oldest first: read its last page so new circles always show.
   const { data: list, isLoading } = useReadContract({
     address: addresses.factory,

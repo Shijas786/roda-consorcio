@@ -35,7 +35,7 @@ cent and confirms in about a second.
 ## What is built
 
 - Three contracts (factory, circle, reputation), deployed and source-verified on Arbitrum Sepolia.
-- 23 Foundry tests including fuzzing and an invariant suite that checks the contract always holds exactly what
+- 26 Foundry tests including fuzzing and an invariant suite that checks the contract always holds exactly what
   it owes.
 - A web app with no backend: create a circle, join, pay, bid, settle, repay, withdraw, and see every member's
   standing and score.
@@ -56,10 +56,15 @@ cent and confirms in about a second.
 - Repository: https://github.com/Shijas786/roda-consorcio
 - Live app: https://shijas786.github.io/roda-consorcio/
 - Demo video: TBD
-- Factory: https://sepolia.arbiscan.io/address/0x4966dD6e5521BF9f04213B9C5C9A929c7D79EAfB
+- Factory: https://sepolia.arbiscan.io/address/0x2Dbcc0d7815dF11020C188943760b4d92AE2ac05
 
 ## Next (during the event window)
 
-- Robinhood Chain testnet deployment with its USDG.
+Past Open House winners were DeFi primitives that used Arbitrum's newest technology, so the event-window work is:
+
+- Reputation scoring in Stylus (Rust): the score moves from a fixed formula in Solidity to a Stylus contract
+  that weighs volume, lateness and recency, which is too expensive to do per join in the EVM.
+- Robinhood Chain testnet deployment with its USDG (one prize per track is reserved for it).
+- Passkey sign-in with sponsored gas, so a new member needs no wallet and no ETH.
 - Under-collateralized seats for high-score members: deposit shrinks as score grows.
 - Portuguese interface.

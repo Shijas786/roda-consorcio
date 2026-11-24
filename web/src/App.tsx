@@ -7,6 +7,9 @@ import { CircleList } from "./CircleList";
 import { CirclePage } from "./CirclePage";
 import { CreateCircle } from "./CreateCircle";
 import { Wheel, type Seat } from "./Wheel";
+import { Activity } from "./Activity";
+import { isMuted, onMuteChange, setMuted } from "./sound";
+import { useSyncExternalStore } from "react";
 
 export function App() {
   const route = useHashRoute();
@@ -33,6 +36,7 @@ function Header() {
   const { connect, connectors, isPending } = useConnect();
   const { disconnect } = useDisconnect();
   const { switchChain } = useSwitchChain();
+  const muted = useSyncExternalStore(onMuteChange, isMuted);
   const hasWallet = typeof window !== "undefined" && "ethereum" in window;
 
   return (
@@ -45,6 +49,9 @@ function Header() {
         <a href="#/">Circles</a>
         <a href="#/new">Start a circle</a>
       </nav>
+      <button className="ghost icon" onClick={() => setMuted(!muted)} aria-label={muted ? "Turn sound on" : "Turn sound off"}>
+        {muted ? "🔇" : "🔊"}
+      </button>
       {!isConnected ? (
         hasWallet ? (
           <button className="primary" disabled={isPending} onClick={() => connect({ connector: connectors[0] })}>
@@ -80,13 +87,11 @@ function Home() {
         <div>
           <span className="eyebrow">Consórcio · Chit fund · Tanda · Susu</span>
           <h1>
-            Save together.
-            <br />
-            <em>Take the pot</em> when you need it.
+            The chit fund with <em>no organizer</em> to run off with the pot.
           </h1>
           <p>
-            The world's oldest way to save, without the organizer who can run off with the money. Everyone pays in
-            USDG each round, one member takes the pot, and the contract enforces the rest.
+            Save together in USDG. Everyone pays in each round, one member takes the pot, and a contract on Arbitrum
+            holds the money and enforces the rules. A round costs a fraction of a cent.
           </p>
           <div className="row">
             <a className="button primary big" href="#/new">
@@ -132,6 +137,7 @@ function Home() {
           <span>Clean circles raise your score and unlock bigger circles.</span>
         </div>
       </section>
+      <Activity />
       <Wallet />
       <CircleList />
     </>

@@ -10,6 +10,18 @@ and a member who already took the pot can stop paying.
 Roda removes both risks. The contract holds the money, nobody can move it, and every member locks a security
 deposit that pays their share automatically if they miss a round.
 
+## Verify it in two minutes
+
+| Claim | Check |
+| --- | --- |
+| It runs on Arbitrum | Open the [live app](https://shijas786.github.io/roda-consorcio/): the feed under the hero lists real transactions, each linked to Arbiscan. No wallet needed. |
+| A whole circle has run | The "Bairro da Liberdade market stall" circle is Completed: three rounds, one pot bid, one missed payment covered by a deposit. Its History lists every transaction. |
+| Nobody can move the money | [`RodaCircle`](contracts/src/RodaCircle.sol) has no owner and no admin function. The factory owner can only edit the token allowlist. |
+| USDG is the currency | [`tokenAllowed(USDG)`](https://sepolia.arbiscan.io/address/0x2Dbcc0d7815dF11020C188943760b4d92AE2ac05#readContract) returns true, and the "Sao Paulo freelancers" circle is denominated in it. |
+| The accounting holds | `cd contracts && forge test`: 26 tests, including an invariant suite asserting the contract holds exactly what it owes. |
+| Source matches bytecode | Exact match on Sourcify: [factory](https://repo.sourcify.dev/421614/0x2Dbcc0d7815dF11020C188943760b4d92AE2ac05), [circle](https://repo.sourcify.dev/421614/0x3df3bD8dd03e0F0293412f514e13A91c0DA6Dcfb), [reputation](https://repo.sourcify.dev/421614/0x42Efbc1d5f67025D29C72b8d7AC4de07a02E2e75). |
+| Try it yourself | Connect a wallet on Arbitrum Sepolia, press "Get 1,000 test dollars", join the 2-minute demo circle. |
+
 ![Roda home](docs/img/home.png)
 
 ## How a circle works
@@ -27,9 +39,10 @@ deposit that pays their share automatically if they miss a round.
 6. **Complete.** After as many rounds as there are members, everyone has received the pot once. Deposits are
    released and each member's outcome is written to the reputation ledger.
 
-Reputation is a public record per address: circles completed, clean circles, late rounds, defaults, volume.
+Reputation is a public record per address and currency: circles completed, clean circles, late rounds, defaults, volume.
 A clean circle is worth 10 points, a circle with late rounds 4, and a default sets the score to 0. Circles can
-require a minimum score, so a good record unlocks larger circles with smaller deposits.
+require a minimum score, so a good record unlocks larger circles with smaller deposits. A score earned in one
+currency does not count in another, so circles in a faucet token cannot buy a score in USDG.
 
 ## Why USDG, why Arbitrum
 
@@ -41,9 +54,9 @@ makes one small payment per round, so a round costs a fraction of a cent on Arbi
 
 | Contract | Address |
 | --- | --- |
-| RodaFactory | [`0x4966dD6e5521BF9f04213B9C5C9A929c7D79EAfB`](https://sepolia.arbiscan.io/address/0x4966dD6e5521BF9f04213B9C5C9A929c7D79EAfB) |
-| RodaCircle (implementation) | [`0xD7E7CB1E5d22f8B9a17426a35bB5AFB181875b91`](https://sepolia.arbiscan.io/address/0xD7E7CB1E5d22f8B9a17426a35bB5AFB181875b91) |
-| RodaReputation | [`0x53C806d9747843417Ac8Cb52c8ccd0fAe3B9488f`](https://sepolia.arbiscan.io/address/0x53C806d9747843417Ac8Cb52c8ccd0fAe3B9488f) |
+| RodaFactory | [`0x2Dbcc0d7815dF11020C188943760b4d92AE2ac05`](https://sepolia.arbiscan.io/address/0x2Dbcc0d7815dF11020C188943760b4d92AE2ac05) |
+| RodaCircle (implementation) | [`0x3df3bD8dd03e0F0293412f514e13A91c0DA6Dcfb`](https://sepolia.arbiscan.io/address/0x3df3bD8dd03e0F0293412f514e13A91c0DA6Dcfb) |
+| RodaReputation | [`0x42Efbc1d5f67025D29C72b8d7AC4de07a02E2e75`](https://sepolia.arbiscan.io/address/0x42Efbc1d5f67025D29C72b8d7AC4de07a02E2e75) |
 | TestDollar (tUSD faucet token) | [`0xaE79b73E813b129055aa0b95Ef4f09D88e912Ee7`](https://sepolia.arbiscan.io/address/0xaE79b73E813b129055aa0b95Ef4f09D88e912Ee7) |
 | USDG (Paxos, allowlisted) | [`0xFFC95faa3d63Cde504a05B567C600B78C0b41892`](https://sepolia.arbiscan.io/address/0xFFC95faa3d63Cde504a05B567C600B78C0b41892) |
 
@@ -83,7 +96,7 @@ cd contracts
 forge test
 ```
 
-23 tests: unit tests for every path, fuzz tests over payment and bid patterns, and an invariant suite.
+26 tests: unit tests for every path, fuzz tests over payment and bid patterns, and an invariant suite.
 
 Deploy:
 

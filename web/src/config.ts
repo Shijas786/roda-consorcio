@@ -5,11 +5,14 @@ import { injected } from "wagmi/connectors";
 export const chain = arbitrumSepolia;
 
 export const addresses = {
-  factory: "0x4966dD6e5521BF9f04213B9C5C9A929c7D79EAfB",
-  reputation: "0x53C806d9747843417Ac8Cb52c8ccd0fAe3B9488f",
+  factory: "0x2Dbcc0d7815dF11020C188943760b4d92AE2ac05",
+  reputation: "0x42Efbc1d5f67025D29C72b8d7AC4de07a02E2e75",
   usdg: "0xFFC95faa3d63Cde504a05B567C600B78C0b41892",
   tusd: "0xaE79b73E813b129055aa0b95Ef4f09D88e912Ee7",
 } as const;
+
+// Block the factory was deployed in: event queries start here.
+export const deployBlock = 0x13d076dcn;
 
 export const tokens = [
   { address: addresses.usdg, symbol: "USDG", name: "Global Dollar (Paxos)", decimals: 6, faucet: false },

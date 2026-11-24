@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAccount, useConfig, useSwitchChain } from "wagmi";
-import { readContract, waitForTransactionReceipt, writeContract } from "wagmi/actions";
+import { readContract, simulateContract, waitForTransactionReceipt, writeContract } from "wagmi/actions";
 import { BaseError, ContractFunctionRevertedError, erc20Abi, formatUnits, type Abi } from "viem";
 import { chain } from "./config";
+import { play } from "./sound";
 
 export type Address = `0x${string}`;
 
@@ -62,9 +63,9 @@ function explain(e: unknown) {
       const name = revert.data?.errorName ?? "";
       return errorText[name] ?? (name || revert.shortMessage);
     }
-    return e.shortMessage;
+    return e.shortMessage.split("\n")[0];
   }
-  return e instanceof Error ? e.message : String(e);
+  return (e instanceof Error ? e.message : String(e)).split("\n")[0];
 }
 
 export type Call = { address: Address; abi: Abi; functionName: string; args?: readonly unknown[] };
@@ -109,13 +110,17 @@ export function useTx() {
           }
         }
         setBusy(label);
+        // Simulate first: a wallet reports a failed call without the contract's reason, a simulation names it.
+        await simulateContract(config, { ...call, account: address } as Parameters<typeof simulateContract>[1]);
         const tx = await writeContract(config, call as Parameters<typeof writeContract>[1]);
         await waitForTransactionReceipt(config, { hash: tx });
         setHash(tx);
+        play("confirm");
         await queryClient.invalidateQueries();
         return tx;
       } catch (e) {
         setError(explain(e));
+        play("error");
       } finally {
         setBusy(null);
       }
@@ -129,7 +134,10 @@ export function useTx() {
 export function useHashRoute() {
   const [hash, setHash] = useState(() => window.location.hash);
   useEffect(() => {
-    const on = () => setHash(window.location.hash);
+    const on = () => {
+      setHash(window.location.hash);
+      window.scrollTo(0, 0);
+    };
     window.addEventListener("hashchange", on);
     return () => window.removeEventListener("hashchange", on);
   }, []);
