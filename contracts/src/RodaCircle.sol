@@ -101,6 +101,7 @@ contract RodaCircle is Initializable, ReentrancyGuardTransient {
     error ScoreTooLow();
     error JoinClosed();
     error JoinStillOpen();
+    error WrongRound();
     error AlreadyPaid();
     error RoundOpen();
     error RoundClosed();
@@ -147,7 +148,7 @@ contract RodaCircle is Initializable, ReentrancyGuardTransient {
         if (block.timestamp > joinDeadline) revert JoinClosed();
         Member storage m = _member[msg.sender];
         if (m.joined) revert AlreadyJoined();
-        if (reputation.scoreOf(msg.sender) < minScore) revert ScoreTooLow();
+        if (reputation.scoreOf(msg.sender, address(token)) < minScore) revert ScoreTooLow();
 
         m.joined = true;
         m.deposit = depositRequired;
@@ -197,7 +198,9 @@ contract RodaCircle is Initializable, ReentrancyGuardTransient {
     // ------------------------------------------------------------------- active
 
     /// @notice Pay this round's contribution.
-    function contribute() external nonReentrant inStatus(Status.Active) {
+    /// @param forRound the round the caller means to pay; guards against the round being settled first.
+    function contribute(uint256 forRound) external nonReentrant inStatus(Status.Active) {
+        if (forRound != round) revert WrongRound();
         Member storage m = _member[msg.sender];
         if (!m.joined) revert NotMember();
         if (m.paidThrough > round) revert AlreadyPaid();
@@ -355,16 +358,19 @@ contract RodaCircle is Initializable, ReentrancyGuardTransient {
 
     function _complete(Member storage lastWinner) private {
         status = Status.Completed;
-        lastWinner.claimable += carry;
+        // Whatever no creditor could take is split between all members, so a winner in debt cannot get its own
+        // repayment back. The indivisible remainder goes to the last winner.
+        uint256 n = _members.length;
+        uint256 share = carry / n;
+        lastWinner.claimable += carry - share * n;
         carry = 0;
 
-        uint256 n = _members.length;
         for (uint256 i; i < n; ++i) {
             address a = _members[i];
             Member storage m = _member[a];
-            m.claimable += m.deposit;
+            m.claimable += share + m.deposit;
             m.deposit = 0;
-            reputation.record(a, m.lateRounds, m.debt != 0, m.paidTotal);
+            reputation.record(a, address(token), m.lateRounds, m.debt != 0, m.paidTotal);
         }
         emit Completed();
     }

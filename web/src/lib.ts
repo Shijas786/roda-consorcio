@@ -40,6 +40,7 @@ const errorText: Record<string, string> = {
   JoinClosed: "The join window has closed.",
   JoinStillOpen: "The join window is still open.",
   AlreadyJoined: "You already have a seat.",
+  WrongRound: "That round was just settled. Check the new round and pay again.",
   AlreadyPaid: "You already paid this round.",
   RoundOpen: "The round has not reached its deadline yet.",
   RoundClosed: "Bidding is closed for this round.",

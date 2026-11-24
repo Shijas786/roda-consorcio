@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { parseUnits } from "viem";
-import { useAccount, useReadContracts } from "wagmi";
+import { useAccount, useReadContract, useReadContracts } from "wagmi";
 import { rodaCircleAbi, rodaReputationAbi } from "./abi";
 import { addresses, explorer, tokenOf } from "./config";
 import { statusLabel } from "./CircleList";
@@ -37,21 +37,29 @@ export function CirclePage({ address }: { address: Address }) {
     contracts: fields.map((functionName) => ({ address, abi: rodaCircleAbi, functionName }) as const),
     query: { refetchInterval: 5000 },
   });
+  // Only circles the factory deployed are registered here; anything else must never be offered a token approval.
+  const { data: registered } = useReadContract({
+    address: addresses.reputation,
+    abi: rodaReputationAbi,
+    functionName: "isCircle",
+    args: [address],
+  });
   const members = (data?.[15] ?? []) as readonly Address[];
+  const circleToken = data?.[1] as Address | undefined;
   const { data: infos } = useReadContracts({
     allowFailure: false,
     contracts: members.flatMap(
       (m) =>
         [
           { address, abi: rodaCircleAbi, functionName: "memberInfo", args: [m] },
-          { address: addresses.reputation, abi: rodaReputationAbi, functionName: "scoreOf", args: [m] },
+          { address: addresses.reputation, abi: rodaReputationAbi, functionName: "scoreOf", args: [m, circleToken!] },
         ] as const,
     ),
     query: { enabled: members.length > 0, refetchInterval: 5000 },
   });
 
-  if (isLoading) return <p className="muted">Loading circle…</p>;
-  if (isError || !data) return <p className="error">This address is not a Roda circle.</p>;
+  if (isLoading || registered === undefined) return <p className="muted">Loading circle…</p>;
+  if (isError || !data || !registered) return <p className="error">This address is not a Roda circle.</p>;
 
   const [
     name, token, contribution, size, period, deposit, minScore, joinDeadline, status, round, roundDeadline,
@@ -205,7 +213,7 @@ export function CirclePage({ address }: { address: Address }) {
                   ? `You paid round ${round + 1n}.`
                   : `Round ${round + 1n} is due. If you miss it, ${amt(contribution)} is taken from your deposit.`}
               </p>
-              <button className="primary" disabled={busy || paid} onClick={() => act("Paying", "contribute", [], contribution)}>
+              <button className="primary" disabled={busy || paid} onClick={() => act("Paying", "contribute", [round], contribution)}>
                 {paid ? "Paid" : `Pay ${amt(contribution)}`}
               </button>
             </div>

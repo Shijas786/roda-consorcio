@@ -145,16 +145,13 @@ function Wallet() {
     allowFailure: true,
     contracts: [
       ...tokens.map((t) => ({ address: t.address, abi: erc20Abi, functionName: "balanceOf", args: [address!] }) as const),
-      { address: addresses.reputation, abi: rodaReputationAbi, functionName: "scoreOf", args: [address!] } as const,
-      { address: addresses.reputation, abi: rodaReputationAbi, functionName: "recordOf", args: [address!] } as const,
+      ...tokens.map(
+        (t) => ({ address: addresses.reputation, abi: rodaReputationAbi, functionName: "scoreOf", args: [address!, t.address] }) as const,
+      ),
     ],
     query: { enabled: !!address },
   });
   const { data: count } = useReadContract({ address: addresses.factory, abi: rodaFactoryAbi, functionName: "circleCount" });
-
-  const record = data?.[tokens.length + 1]?.result as
-    | { circlesCompleted: bigint; cleanCircles: bigint; lateRounds: bigint; defaults: bigint; volume: bigint }
-    | undefined;
 
   return (
     <section className="grid stats">
@@ -183,11 +180,13 @@ function Wallet() {
       ))}
       <div className="card">
         <label>Your reputation</label>
-        <strong>{address ? ((data?.[tokens.length]?.result as bigint | undefined)?.toString() ?? "–") : "–"}</strong>
+        <strong>
+          {address
+            ? tokens.map((t, i) => (data?.[tokens.length + i]?.result as bigint | undefined)?.toString() ?? "–").join(" · ")
+            : "–"}
+        </strong>
         <span className="muted">
-          {record
-            ? `${record.cleanCircles} clean of ${record.circlesCompleted} circles, ${record.defaults} defaults`
-            : "Connect a wallet to see your record"}
+          {address ? `${tokens.map((t) => t.symbol).join(" · ")}: earned per currency, 10 points per clean circle` : "Connect a wallet to see your score"}
         </span>
       </div>
     </section>

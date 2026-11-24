@@ -43,15 +43,17 @@ contract Handler is Test {
 
     function contribute(uint256 seed) external {
         address a = _actor(seed);
+        uint256 round = circle.round();
         vm.prank(a);
-        try circle.contribute() {
+        try circle.contribute(round) {
             paidIn += circle.contribution();
         } catch {}
     }
 
     function bid(uint256 seed, uint256 amount) external {
+        amount = bound(amount, 1, circle.maxBid());
         vm.prank(_actor(seed));
-        try circle.bid(bound(amount, 1, circle.maxBid())) {} catch {}
+        try circle.bid(amount) {} catch {}
     }
 
     function repay(uint256 seed, uint256 amount) external {

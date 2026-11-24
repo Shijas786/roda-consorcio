@@ -2,7 +2,8 @@
 pragma solidity 0.8.28;
 
 /// @title RodaReputation
-/// @notice Append-only payment history per address, written only by circles the factory deployed.
+/// @notice Append-only payment history per address and token, written only by circles the factory deployed.
+/// @dev History is kept per token so that circles in a worthless token cannot buy a score in a valuable one.
 contract RodaReputation {
     struct Record {
         uint32 circlesCompleted;
@@ -17,11 +18,16 @@ contract RodaReputation {
 
     address public immutable factory;
     mapping(address circle => bool) public isCircle;
-    mapping(address member => Record) private _records;
+    mapping(address token => mapping(address member => Record)) private _records;
 
     event CircleAuthorized(address indexed circle);
     event OutcomeRecorded(
-        address indexed circle, address indexed member, uint256 lateRounds, bool defaulted, uint256 volume
+        address indexed circle,
+        address indexed member,
+        address indexed token,
+        uint256 lateRounds,
+        bool defaulted,
+        uint256 volume
     );
 
     error NotFactory();
@@ -37,12 +43,13 @@ contract RodaReputation {
         emit CircleAuthorized(circle);
     }
 
+    /// @param token the circle's currency
     /// @param lateRounds rounds the member's security deposit had to cover
     /// @param defaulted true if the member finished the circle still owing contributions
     /// @param volume total contributions the member paid in the circle
-    function record(address member, uint256 lateRounds, bool defaulted, uint256 volume) external {
+    function record(address member, address token, uint256 lateRounds, bool defaulted, uint256 volume) external {
         if (!isCircle[msg.sender]) revert NotCircle();
-        Record storage r = _records[member];
+        Record storage r = _records[token][member];
         if (defaulted) {
             r.defaults += 1;
         } else {
@@ -51,16 +58,16 @@ contract RodaReputation {
         }
         r.lateRounds += uint32(lateRounds);
         r.volume += uint128(volume);
-        emit OutcomeRecorded(msg.sender, member, lateRounds, defaulted, volume);
+        emit OutcomeRecorded(msg.sender, member, token, lateRounds, defaulted, volume);
     }
 
-    function recordOf(address member) external view returns (Record memory) {
-        return _records[member];
+    function recordOf(address member, address token) external view returns (Record memory) {
+        return _records[token][member];
     }
 
-    /// @notice 0 for anyone with a default on record, otherwise points for every completed circle.
-    function scoreOf(address member) external view returns (uint256) {
-        Record storage r = _records[member];
+    /// @notice 0 for anyone with a default on record in `token`, otherwise points for every circle completed in it.
+    function scoreOf(address member, address token) external view returns (uint256) {
+        Record storage r = _records[token][member];
         if (r.defaults != 0) return 0;
         return CLEAN_POINTS * r.cleanCircles + LATE_POINTS * (r.circlesCompleted - r.cleanCircles);
     }
