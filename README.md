@@ -10,6 +10,8 @@ and a member who already took the pot can stop paying.
 Roda removes both risks. The contract holds the money, nobody can move it, and every member locks a security
 deposit that pays their share automatically if they miss a round.
 
+![Roda home](docs/img/home.png)
+
 ## How a circle works
 
 1. **Create.** Anyone sets the terms: currency, contribution, number of members, round length, security
