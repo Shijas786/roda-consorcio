@@ -17,6 +17,8 @@ type Member = {
   paidTotal: bigint;
 };
 
+const SETTLE_GRACE = 5;
+
 const fields = [
   "name", "token", "contribution", "size", "period", "depositRequired", "minScore", "joinDeadline", "status",
   "round", "roundDeadline", "roundCollected", "carry", "highestBid", "highestBidder", "members", "creator", "maxBid",
@@ -64,6 +66,8 @@ export function CirclePage({ address }: { address: Address }) {
   const isMember = !!mine?.joined;
   const paid = isMember && BigInt(mine!.paidThrough) > round;
   const roundLeft = Number(roundDeadline) - now;
+  // The chain's clock trails wall time by a few seconds; wait it out before offering settlement.
+  const canSettle = roundLeft <= -SETTLE_GRACE;
   const joinLeft = Number(joinDeadline) - now;
   const call = (functionName: string, args?: readonly unknown[]): Call => ({ address, abi: rodaCircleAbi, functionName, args });
   const act = (label: string, fn: string, args?: readonly unknown[], spend?: bigint) =>
@@ -111,7 +115,7 @@ export function CirclePage({ address }: { address: Address }) {
           </strong>
           <span className="muted">
             {status === 0 && (joinLeft > 0 ? `${duration(joinLeft)} left to join` : "join window closed")}
-            {status === 1 && (roundLeft > 0 ? `closes in ${duration(roundLeft)}` : "ready to settle")}
+            {status === 1 && (roundLeft > 0 ? `closes in ${duration(roundLeft)}` : canSettle ? "ready to settle" : "closing…")}
             {status === 2 && "all pots paid"}
             {status === 3 && "deposits unlocked"}
           </span>
@@ -184,7 +188,7 @@ export function CirclePage({ address }: { address: Address }) {
             )}
           </>
         )}
-        {status === 1 && me && roundLeft <= 0 && (
+        {status === 1 && me && canSettle && (
           <div className="action">
             <p>The round is over. Anyone can settle it: missed payments are collected and the pot is paid.</p>
             <button className="primary" disabled={busy} onClick={() => act("Settling", "settle")}>
