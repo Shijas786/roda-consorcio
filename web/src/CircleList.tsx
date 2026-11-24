@@ -6,14 +6,18 @@ import { Wheel, type Seat } from "./Wheel";
 
 export const statusLabel = ["Forming", "Active", "Completed", "Cancelled"] as const;
 
+const PAGE = 100n;
 const fields = ["name", "token", "contribution", "size", "period", "depositRequired", "status", "round", "memberCount", "minScore"] as const;
 
 export function CircleList() {
+  const { data: total } = useReadContract({ address: addresses.factory, abi: rodaFactoryAbi, functionName: "circleCount" });
+  // The registry lists oldest first: read its last page so new circles always show.
   const { data: list, isLoading } = useReadContract({
     address: addresses.factory,
     abi: rodaFactoryAbi,
     functionName: "circles",
-    args: [0n, 100n],
+    args: [total !== undefined && total > PAGE ? total - PAGE : 0n, PAGE],
+    query: { enabled: total !== undefined },
   });
   const circles = [...(list ?? [])].reverse() as Address[];
   const { data } = useReadContracts({
