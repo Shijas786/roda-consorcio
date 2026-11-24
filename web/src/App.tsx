@@ -49,8 +49,21 @@ function Header() {
         <a href="#/">Circles</a>
         <a href="#/new">Start a circle</a>
       </nav>
-      <button className="ghost icon" onClick={() => setMuted(!muted)} aria-label={muted ? "Turn sound on" : "Turn sound off"}>
-        {muted ? "🔇" : "🔊"}
+      <button
+        className={`ghost sound ${muted ? "off" : "on"}`}
+        onClick={() => setMuted(!muted)}
+        aria-pressed={!muted}
+        title={muted ? "Turn sound on" : "Turn sound off"}
+      >
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+          <path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor" />
+          {muted ? (
+            <path d="M16 9.5l5 5m0-5l-5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" fill="none" />
+          ) : (
+            <path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" fill="none" />
+          )}
+        </svg>
+        <span>{muted ? "Sound off" : "Sound on"}</span>
       </button>
       {!isConnected ? (
         hasWallet ? (

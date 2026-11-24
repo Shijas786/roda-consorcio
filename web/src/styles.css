@@ -163,6 +163,10 @@ tr.empty td { color: var(--muted); }
 }
 
 .icon { padding: 8px 12px; border-color: transparent; }
+.sound { display: inline-flex; align-items: center; gap: 7px; padding: 8px 14px; font-size: 14px; color: var(--muted); }
+.sound.on { color: var(--text); }
+.sound.on svg { color: #f5c451; }
+@media (max-width: 560px) { .sound span { display: none; } .sound { padding: 8px 10px; } }
 .counters { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 36px; padding: 26px 22px; border: 1px solid var(--line); border-radius: 22px; background: var(--panel); }
 .counters div { text-align: center; }
 .counters strong { display: block; font-size: clamp(32px, 4vw, 48px); font-weight: 800; letter-spacing: -0.03em; line-height: 1; font-variant-numeric: tabular-nums; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }

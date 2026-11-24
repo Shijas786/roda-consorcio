@@ -58,13 +58,25 @@ cent and confirms in about a second.
 - Demo video: TBD
 - Factory: https://sepolia.arbiscan.io/address/0x2Dbcc0d7815dF11020C188943760b4d92AE2ac05
 
+## What is live, what is not
+
+| Live on Arbitrum Sepolia now | Not built yet |
+| --- | --- |
+| Factory, circle and reputation contracts, source-verified | Mainnet deployment |
+| Create, join, pay, bid, settle, repay, withdraw in the web app | Passkey sign-in and sponsored gas (a wallet and test ETH are still needed) |
+| USDG allowlisted, one USDG circle open | Real USDG volume: the demo circles run on the tUSD faucet token |
+| Live event feed and counters read straight from the chain | Audit |
+
 ## Next (during the event window)
 
-Past Open House winners were DeFi primitives that used Arbitrum's newest technology, so the event-window work is:
+Past Open House winners were DeFi primitives that used Arbitrum's newest technology, and ETHGlobal finalists
+show the product working live with the crypto hidden behind a habit people already have. The event-window work:
 
-- Reputation scoring in Stylus (Rust): the score moves from a fixed formula in Solidity to a Stylus contract
-  that weighs volume, lateness and recency, which is too expensive to do per join in the EVM.
+- **Join from a link, no wallet.** A circle invite opens with a passkey, gas is sponsored, and the first payment
+  is the first thing the member sees. This is what makes a chit fund group move over from WhatsApp.
+- **Round night.** A full-screen projector view of one circle: the wheel turns as payments land, bids appear
+  live, and settlement plays the payout sound and lights the winner's seat. This is the demo's centrepiece.
+- Reputation scoring in Stylus (Rust): weighs volume, lateness and recency, which is too expensive to do per
+  join in the EVM.
 - Robinhood Chain testnet deployment with its USDG (one prize per track is reserved for it).
-- Passkey sign-in with sponsored gas, so a new member needs no wallet and no ETH.
 - Under-collateralized seats for high-score members: deposit shrinks as score grows.
-- Portuguese interface.
